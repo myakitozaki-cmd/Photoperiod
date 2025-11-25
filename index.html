@@ -1,0 +1,707 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Photoperiod — Login + 4 Relay Dashboard</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap">
+<style>
+:root{
+  --bg:#f6fbf6;
+  --card:#fff;
+  --accent:#3fb13f;
+  --muted:#6f7a6d;
+  --danger:#e24a4a;
+}
+html,body{height:100%;margin:0;background:var(--bg);font-family:Inter,Segoe UI,Arial;color:#112;-webkit-tap-highlight-color: transparent;}
+.hidden{display:none !important;visibility:hidden !important;opacity:0 !important;pointer-events:none !important;}
+.wrap{max-width:1100px;margin:18px auto;padding:14px}
+.centered{display:flex;align-items:center;justify-content:center}
+.login-card{width:420px;margin:40px auto;padding:22px;border-radius:12px;background:var(--card);box-shadow:0 10px 30px rgba(8,30,15,0.06);display:flex;flex-direction:column}
+.h1{font-weight:800;margin:0 0 6px}
+.muted{color:var(--muted);font-size:13px;margin-top:8px}
+.input{width:100%;padding:10px;border-radius:8px;border:1px solid #eee;margin-top:8px;font-size:14px}
+.btn{padding:10px;border-radius:8px;border:none;cursor:pointer;font-weight:700}
+.btn-primary{background:var(--accent);color:#fff;width:100%}
+.link{background:transparent;border:none;color:var(--accent);cursor:pointer;margin-top:8px}
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:12px;border-radius:10px;background:var(--card);box-shadow:0 6px 18px rgba(8,30,15,0.04);margin-bottom:12px}
+.signout{background:#eee;border-radius:8px;padding:8px 10px;border:none;cursor:pointer}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+.panel{background:var(--card);border-radius:10px;padding:12px;box-shadow:0 8px 20px rgba(8,30,15,0.06);min-height:220px;position:relative;overflow:hidden;z-index:1}
+.panel > .content-layer{position:relative;z-index:2}
+.head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.title{font-weight:700}
+.clock{font-size:12px;color:var(--muted)}
+.state-pill{font-size:12px;color:var(--muted)}
+.select-area{display:flex;flex-direction:column;gap:10px;position:relative;z-index:3}
+.mode-btn{padding:12px;border-radius:8px;border:1px solid #eee;background:#fff;cursor:pointer;font-weight:700}
+.mode-btn.auto{background:#daf4ff}
+.mode-btn.manual{background:#e7f9e7}
+[id$="-auto-setup"]{position:relative;z-index:10}
+.timers{display:flex;gap:10px;justify-content:space-between;margin-top:6px}
+.timer{flex:1;text-align:center}
+.timer .label{font-size:12px;color:var(--muted);margin-bottom:6px}
+.time-big{display:inline-block;padding:8px 12px;border-radius:8px;background:#fff;font-weight:800;font-size:20px;min-width:120px;text-align:center}
+.pm-row{display:flex;gap:8px;justify-content:center;margin-top:8px}
+.pm-btn{width:38px;height:34px;border-radius:8px;border:none;background:var(--accent);color:#fff;cursor:pointer;font-weight:800;z-index:12}
+.start-wide{margin-top:12px;padding:14px 12px;border-radius:10px;border:none;background:var(--accent);color:#fff;width:100%;font-weight:800;z-index:15}
+.back-small{margin-top:8px;padding:8px;border-radius:8px;border:none;background:#eee;width:150px;font-weight:700;cursor:pointer;z-index:12}
+[id$="-running"]{position:relative;z-index:6}
+.running-area{display:flex;flex-direction:column;align-items:center;gap:8px;padding-top:6px;z-index:6}
+.count-big{font-size:28px;font-weight:800;padding:10px 14px;border-radius:8px;background:#fff;min-width:140px;text-align:center}
+.abort-small{padding:8px 12px;border-radius:8px;border:none;background:var(--danger);color:#fff;cursor:pointer;z-index:20}
+[id$="-manual"]{position:relative;z-index:4}
+.manual-row{display:flex;gap:8px;justify-content:center;margin-top:8px}
+.manual-toggle{padding:10px 14px;border-radius:8px;border:none;background:#ddd;color:#111;font-weight:800;min-width:120px}
+.manual-toggle.on{background:var(--accent);color:#fff}
+.manual-back{padding:8px;border-radius:8px;border:none;background:#eee;display:block;margin:10px auto}
+.note{font-size:13px;color:var(--muted);margin-top:8px}
+footer{margin-top:18px;color:var(--muted);font-size:13px;text-align:center}
+</style>
+</head>
+<body>
+  <!-- LOGIN -->
+  <div id="loginScreen" class="login-card centered" style="flex-direction:column">
+    <div style="width:100%">
+      <div class="h1">Photoperiod Control</div>
+      <div class="muted">Sign in to control relays</div>
+
+      <input id="email" class="input" type="email" placeholder="Email" />
+      <input id="password" class="input" type="password" placeholder="Password" />
+
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button id="loginBtn" class="btn btn-primary" style="flex:1">Log in</button>
+        <button id="signupBtn" class="btn" style="background:#eee">Sign up</button>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;margin-top:8px">
+        <label style="font-size:13px"><input id="remember" type="checkbox" /> Remember</label>
+        <button id="resetBtn" class="link">Forgot password?</button>
+      </div>
+
+      <div id="loginMsg" class="muted"></div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="dashboard" class="wrap hidden">
+    <div class="topbar">
+      <div>
+        <strong>Photoperiod Dashboard</strong>
+        <div class="note" id="userEmail"> </div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <div id="localClock" class="muted"></div>
+        <button id="signOut" class="signout">Sign out</button>
+      </div>
+    </div>
+
+    <div id="panels" class="grid"></div>
+
+    <footer>Device fields: running, remaining, timer_end. UI writes: mode,on_dur_h,on_dur_m,off_dur_h,off_dur_m,start,abort,state(manual).</footer>
+  </div>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+
+<script>
+/* FIREBASE CONFIG */
+const firebaseConfig = {
+  apiKey: "AIzaSyABYf-nmilVKOGzbemyKhJVq-K2g20OuAU",
+  authDomain: "photoperiod-system.firebaseapp.com",
+  databaseURL: "https://photoperiod-system-default-rtdb.firebaseio.com",
+  projectId: "photoperiod-system",
+  storageBucket: "photoperiod-system.firebasestorage.app",
+  messagingSenderId: "856299021904",
+  appId: "1:856299021904:web:1724f754da7a2520279355"
+};
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const db = firebase.database();
+
+/* DOM refs */
+const loginScreen = document.getElementById('loginScreen');
+const dashboard = document.getElementById('dashboard');
+const loginBtn = document.getElementById('loginBtn');
+const signupBtn = document.getElementById('signupBtn');
+const resetBtn = document.getElementById('resetBtn');
+const emailInput = document.getElementById('email');
+const pwInput = document.getElementById('password');
+const rememberChk = document.getElementById('remember');
+const loginMsg = document.getElementById('loginMsg');
+const signOutBtn = document.getElementById('signOut');
+const userEmailDiv = document.getElementById('userEmail');
+const panelsDiv = document.getElementById('panels');
+const localClock = document.getElementById('localClock');
+
+setInterval(()=> localClock.innerText = new Date().toLocaleTimeString(), 1000);
+
+/* Auth handlers (unchanged) */
+loginBtn.addEventListener('click', () => {
+  const email = emailInput.value.trim();
+  const password = pwInput.value;
+  if (!email || !password) return loginMsg.innerText = 'Enter email & password.';
+  auth.setPersistence(rememberChk.checked ? firebase.auth.Auth.Persistence.LOCAL : firebase.auth.Auth.Persistence.SESSION)
+    .then(() => auth.signInWithEmailAndPassword(email, password))
+    .catch(err => loginMsg.innerText = 'Login failed: ' + err.message);
+});
+signupBtn.addEventListener('click', () => {
+  const email = emailInput.value.trim();
+  const password = pwInput.value;
+  if (!email || !password) return loginMsg.innerText = 'Enter email & password to sign up.';
+  auth.createUserWithEmailAndPassword(email, password)
+    .then(() => loginMsg.innerText = 'Account created. Signed in.')
+    .catch(err => loginMsg.innerText = 'Signup failed: ' + err.message);
+});
+resetBtn.addEventListener('click', () => {
+  const email = emailInput.value.trim();
+  if (!email) return loginMsg.innerText = 'Enter email to reset.';
+  auth.sendPasswordResetEmail(email)
+    .then(()=> loginMsg.innerText = 'Password reset email sent.')
+    .catch(err=> loginMsg.innerText = 'Reset failed: ' + err.message);
+});
+signOutBtn.addEventListener('click', () => {
+  auth.signOut().catch(err => console.warn('Signout failed', err));
+});
+
+auth.onAuthStateChanged(user => {
+  if (user) {
+    loginScreen.classList.add('hidden');
+    dashboard.classList.remove('hidden');
+    userEmailDiv.innerText = user.email;
+    if (!panelsDiv.hasChildNodes()) buildPanels();
+  } else {
+    dashboard.classList.add('hidden');
+    loginScreen.classList.remove('hidden');
+  }
+});
+
+/* Relays */
+const RELAYS = ['relay1','relay2','relay3','relay4'];
+
+function buildPanels(){
+  panelsDiv.innerHTML = '';
+  RELAYS.forEach((rid, idx) => {
+    const panel = document.createElement('div');
+    panel.className = 'panel';
+    panel.innerHTML = `
+      <div class="head">
+        <div>
+          <div class="title">Light ${idx+1}</div>
+          <div class="muted">Relay: ${rid}</div>
+        </div>
+        <div>
+          <div class="clock" id="${rid}-clock">--:--:--</div>
+          <div class="state-pill" id="${rid}-pill">IDLE</div>
+        </div>
+      </div>
+
+      <div class="content-layer" id="${rid}-content">
+        <div id="${rid}-select" class="select-area">
+          <button id="${rid}-btnAuto" class="mode-btn auto">Auto</button>
+          <button id="${rid}-btnManual" class="mode-btn manual">Manual</button>
+        </div>
+
+        <div id="${rid}-auto-setup" class="hidden">
+          <div class="timers">
+            <div class="timer">
+              <div class="label">On timer</div>
+              <div class="time-big" id="${rid}-onDisplay">01:00:00</div>
+              <div class="pm-row"><button id="${rid}-onPlus" class="pm-btn">+</button><button id="${rid}-onMinus" class="pm-btn">−</button></div>
+            </div>
+            <div class="timer">
+              <div class="label">Off timer</div>
+              <div class="time-big" id="${rid}-offDisplay">01:00:00</div>
+              <div class="pm-row"><button id="${rid}-offPlus" class="pm-btn">+</button><button id="${rid}-offMinus" class="pm-btn">−</button></div>
+            </div>
+          </div>
+          <button id="${rid}-start" class="start-wide">Start</button>
+          <div style="display:flex;justify-content:center;margin-top:8px"><button id="${rid}-backAuto" class="back-small">Back</button></div>
+        </div>
+
+        <div id="${rid}-running" class="hidden">
+          <div class="running-area">
+            <div class="count-big" id="${rid}-count">00:00:00</div>
+            <div>Phase: <span id="${rid}-phase">—</span> · State: <span id="${rid}-state">OFF</span></div>
+            <button id="${rid}-abort" class="abort-small">Abort</button>
+          </div>
+        </div>
+
+        <div id="${rid}-manual" class="hidden">
+          <div style="text-align:center;margin-top:8px">
+            <div class="manual-row">
+              <button id="${rid}-manualOn" class="manual-toggle">ON</button>
+              <button id="${rid}-manualOff" class="manual-toggle">OFF</button>
+            </div>
+            <div style="margin-top:8px"><button id="${rid}-backManual" class="manual-back">Back</button></div>
+            <div style="margin-top:8px">State: <span id="${rid}-manualState">OFF</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="note">DB: <code>/relays/${rid}</code></div>
+    `;
+    panelsDiv.appendChild(panel);
+    attachRelayLogic(rid, idx);
+  });
+}
+
+/* Per-relay logic (manual-mode UI-first behavior) */
+function attachRelayLogic(rid, idx){
+  const ref = db.ref(`/relays/${rid}`);
+  const clockEl = document.getElementById(`${rid}-clock`);
+  const pillEl = document.getElementById(`${rid}-pill`);
+  const selectEl = document.getElementById(`${rid}-select`);
+  const autoBtn = document.getElementById(`${rid}-btnAuto`);
+  const manualBtn = document.getElementById(`${rid}-btnManual`);
+  const autoSetup = document.getElementById(`${rid}-auto-setup`);
+  const onDisplay = document.getElementById(`${rid}-onDisplay`);
+  const offDisplay = document.getElementById(`${rid}-offDisplay`);
+  const onPlus = document.getElementById(`${rid}-onPlus`);
+  const onMinus = document.getElementById(`${rid}-onMinus`);
+  const offPlus = document.getElementById(`${rid}-offPlus`);
+  const offMinus = document.getElementById(`${rid}-offMinus`);
+  const startBtn = document.getElementById(`${rid}-start`);
+  const backAuto = document.getElementById(`${rid}-backAuto`);
+  const runningEl = document.getElementById(`${rid}-running`);
+  const countEl = document.getElementById(`${rid}-count`);
+  const phaseEl = document.getElementById(`${rid}-phase`);
+  const stateEl = document.getElementById(`${rid}-state`);
+  const abortBtn = document.getElementById(`${rid}-abort`);
+  const manualEl = document.getElementById(`${rid}-manual`);
+  const manualOn = document.getElementById(`${rid}-manualOn`);
+  const manualOff = document.getElementById(`${rid}-manualOff`);
+  const backManual = document.getElementById(`${rid}-backManual`);
+  const manualState = document.getElementById(`${rid}-manualState`);
+
+  // local state
+  let currentView = 'select', prevView = 'select';
+  let onSeconds = 3600, offSeconds = 3600;
+  let ignoreRunningUntil = 0;
+  let ignoreManualUntil = 0;
+  let localRemaining = 0;
+  let countdownInterval = null;
+  let localManualState = false;      // visible selection (true = ON)
+  let localManualRequestTs = 0;
+
+  // clock
+  setInterval(()=> clockEl.innerText = new Date().toLocaleTimeString(), 1000);
+
+  // helper to produce readable pill text
+  function statusText(d){
+    d = d || {};
+    const st = d.state === true ? 'ON' : 'OFF';
+    const mode = d.mode ? String(d.mode).toUpperCase() : '';
+    return mode ? `${st} (${mode})` : st;
+  }
+
+  function show(v){
+    currentView = v;
+    selectEl.classList.add('hidden');
+    autoSetup.classList.add('hidden');
+    runningEl.classList.add('hidden');
+    manualEl.classList.add('hidden');
+
+    if (v === 'select') selectEl.classList.remove('hidden');
+    if (v === 'auto') autoSetup.classList.remove('hidden');
+    if (v === 'running') {
+      runningEl.classList.remove('hidden');
+      if (localRemaining > 0) startLocalCountdown();
+    } else {
+      stopLocalCountdown();
+    }
+    if (v === 'manual') {
+      manualEl.classList.remove('hidden');
+      manualOn.disabled = manualOff.disabled = false;
+    }
+  }
+  show('select');
+
+function startLocalCountdown(){
+  if (countdownInterval) clearInterval(countdownInterval);
+  countdownInterval = setInterval(() => {
+    if (localRemaining > 0) {
+      localRemaining--;
+      countEl.innerText = secToHHMMSS(localRemaining);
+    } else {
+      // stop when reached zero and reflect expired UI
+      localRemaining = 0;
+      countEl.innerText = '00:00:00';
+      clearInterval(countdownInterval);
+      countdownInterval = null;
+      // if running was true on server, you'll pick up server state via ref.on
+    }
+  }, 1000);
+}
+
+function stopLocalCountdown(){
+  if (countdownInterval) {
+    clearInterval(countdownInterval);
+    countdownInterval = null;
+  }
+}
+
+  function updateDisplays(){ onDisplay.innerText = secToHHMMSS(onSeconds); offDisplay.innerText = secToHHMMSS(offSeconds); }
+  updateDisplays();
+
+  autoBtn.addEventListener('click', ()=> {
+    prevView = 'auto';
+    show('auto');
+    writeUpdate(rid, { mode:'auto' }).catch(()=>{});
+  });
+
+  // Enter manual view: show UI and reflect last local selection
+  manualBtn.addEventListener('click', ()=> {
+    prevView = 'manual';
+    show('manual');
+    writeUpdate(rid, { mode:'manual' }).catch(()=>{});
+    manualOn.classList.remove('hidden');
+    manualOff.classList.remove('hidden');
+    // reflect local selection (UI-authoritative while in manual view)
+    manualState.innerText = localManualState ? 'ON' : 'OFF';
+    if (localManualState) { manualOn.classList.add('on'); manualOff.classList.remove('on'); }
+    else { manualOff.classList.add('on'); manualOn.classList.remove('on'); }
+
+    // update top pill to match manual UI immediately
+    pillEl.innerText = statusText({ state: localManualState, mode: 'manual' });
+    stateEl.innerText = localManualState ? 'ON' : 'OFF';
+  });
+
+  onPlus.addEventListener('click', ()=> { onSeconds += 3600; updateDisplays(); });
+  onMinus.addEventListener('click', ()=> { onSeconds = Math.max(0, onSeconds - 3600); updateDisplays(); });
+  offPlus.addEventListener('click', ()=> { offSeconds += 3600; updateDisplays(); });
+  offMinus.addEventListener('click', ()=> { offSeconds = Math.max(0, offSeconds - 3600); updateDisplays(); });
+
+  startBtn.addEventListener('click', ()=> {
+    if (onSeconds <= 0 && offSeconds <= 0) return alert('Set durations > 0');
+    startBtn.disabled = true;
+    const oh = Math.floor(onSeconds/3600), om = Math.floor((onSeconds%3600)/60);
+    const fh = Math.floor(offSeconds/3600), fm = Math.floor((offSeconds%3600)/60);
+    const updates = {};
+    updates[`/relays/${rid}/on_dur_h`] = oh;
+    updates[`/relays/${rid}/on_dur_m`] = om;
+    updates[`/relays/${rid}/off_dur_h`] = fh;
+    updates[`/relays/${rid}/off_dur_m`] = fm;
+    updates[`/relays/${rid}/mode`] = 'auto';
+    updates[`/relays/${rid}/start`] = true;
+    db.ref().update(updates)
+      .then(()=> {
+        startBtn.disabled = false;
+        prevView = 'auto';
+        show('running');
+      })
+      .catch(err => { startBtn.disabled = false; alert('Start failed: '+(err.message||err)); });
+  });
+
+  backAuto.addEventListener('click', ()=> {
+    writeUpdate(rid, { abort:true }).catch(()=>{});
+    prevView = 'select';
+    show('select');
+  });
+
+  // Abort (unchanged behavior) - sets OFF and returns to select
+  abortBtn.onclick = () => {
+    abortBtn.disabled = true;
+    abortBtn.style.opacity = "0.6";
+
+    const ts = Math.floor(Date.now()/1000);
+    const updates = {};
+    updates[`/relays/${rid}/abort`] = true;
+    updates[`/relays/${rid}/state`] = false;
+    updates[`/relays/${rid}/running`] = false;
+    updates[`/relays/${rid}/timer_end`] = 0;
+    updates[`/relays/${rid}/remaining_h`] = 0;
+    updates[`/relays/${rid}/remaining_m`] = 0;
+    updates[`/relays/${rid}/last_changed`] = ts;
+    updates[`/relays/${rid}/mode`] = 'manual';
+
+    db.ref().update(updates)
+      .then(() => {
+        localRemaining = 0;
+        stopLocalCountdown();
+        countEl.innerText = '--:--';
+
+        // immediate UI feedback
+        pillEl.innerText = 'OFF (MANUAL)';
+        stateEl.innerText = 'OFF';
+        phaseEl.innerText = '—';
+
+        manualOn.classList.remove('hidden');
+        manualOff.classList.remove('hidden');
+        manualOn.disabled = manualOff.disabled = false;
+
+        prevView = 'select';
+        show('select');
+
+        setTimeout(() => { writeUpdate(rid, { abort: false }).catch(()=>{}); }, 700);
+        setTimeout(() => { abortBtn.disabled = false; abortBtn.style.opacity = "1.0"; }, 500);
+      })
+      .catch(err => {
+        abortBtn.disabled = false;
+        abortBtn.style.opacity = "1.0";
+        alert('Abort failed to write to server. Check connection and try again.');
+      });
+  };
+
+  // ===== Manual buttons: update UI immediately AND write to Firebase =====
+  manualOn.onclick = () => {
+    // UI immediate
+    manualState.innerText = 'ON';
+    manualOn.classList.add('on');
+    manualOff.classList.remove('on');
+    manualOn.classList.remove('hidden');
+    manualOff.classList.add('hidden');
+    localManualState = true;
+
+    // immediate top pill + state reflect user's click
+    pillEl.innerText = statusText({ state: true, mode: 'manual' });
+    stateEl.innerText = 'ON';
+
+    // write request to DB
+    localManualRequestTs = Math.floor(Date.now()/1000);
+    const updates = {};
+    updates[`/relays/${rid}/mode`] = 'manual';
+    updates[`/relays/${rid}/state`] = true;
+    updates[`/relays/${rid}/last_changed`] = localManualRequestTs;
+    updates[`/relays/${rid}/manual_request_ts`] = localManualRequestTs;
+    updates[`/relays/${rid}/manual_request_by`] = 'web';
+
+    db.ref().update(updates)
+      .then(()=> console.log('manualOn write OK', rid))
+      .catch(err => console.error('manualOn write FAILED', rid, err));
+  };
+
+  manualOff.onclick = () => {
+    // UI immediate
+    manualState.innerText = 'OFF';
+    manualOff.classList.add('on');
+    manualOn.classList.remove('on');
+    manualOff.classList.remove('hidden');
+    manualOn.classList.add('hidden');
+    localManualState = false;
+
+    // immediate top pill + state reflect user's click
+    pillEl.innerText = statusText({ state: false, mode: 'manual' });
+    stateEl.innerText = 'OFF';
+
+    // write request to DB
+    localManualRequestTs = Math.floor(Date.now()/1000);
+    const updates = {};
+    updates[`/relays/${rid}/mode`] = 'manual';
+    updates[`/relays/${rid}/state`] = false;
+    updates[`/relays/${rid}/last_changed`] = localManualRequestTs;
+    updates[`/relays/${rid}/manual_request_ts`] = localManualRequestTs;
+    updates[`/relays/${rid}/manual_request_by`] = 'web';
+
+    db.ref().update(updates)
+      .then(()=> console.log('manualOff write OK', rid))
+      .catch(err => console.error('manualOff write FAILED', rid, err));
+  };
+
+  // Back from manual: write OFF and immediately reflect OFF locally
+  backManual.addEventListener('click', ()=> {
+    const ts = Math.floor(Date.now()/1000);
+    const updates = {};
+    updates[`/relays/${rid}/state`] = false;
+    updates[`/relays/${rid}/last_changed`] = ts;
+    updates[`/relays/${rid}/manual_request_by`] = 'web';
+    updates[`/relays/${rid}/mode`] = 'manual';
+
+    // Immediate UI feedback: show OFF (MANUAL)
+    pillEl.innerText = statusText({ state: false, mode: 'manual' });
+    stateEl.innerText = 'OFF';
+    manualState.innerText = 'OFF';
+    manualOn.classList.remove('on');
+    manualOff.classList.add('on');
+
+    db.ref().update(updates)
+      .then(()=> console.log('Back->OFF write OK for', rid))
+      .catch(err => console.error('Back->OFF write FAILED for', rid, err));
+
+    // restore UI controls and go to select
+    manualOn.classList.remove('hidden');
+    manualOff.classList.remove('hidden');
+
+    prevView = 'select';
+    show('select');
+
+    // refresh localManualState from DB (non-blocking)
+    ref.get().then(snap => {
+      const d = snap.val()||{};
+      const st = d.state === true;
+      manualState.innerText = st ? 'ON' : 'OFF';
+      if (st) { manualOn.classList.add('on'); manualOff.classList.remove('on'); }
+      else { manualOff.classList.add('on'); manualOn.classList.remove('on'); }
+      localManualState = st;
+      pillEl.innerText = statusText(d);
+    }).catch(err => {
+      console.warn('BackManual: refresh failed', err);
+    });
+  });
+
+  // ===== DB listener (does not overwrite manual UI while user is in Manual view) =====
+  // ===== DB listener (does not overwrite manual UI while user is in Manual view) =====
+ref.on('value', snap => {
+  const d = snap.val() || {};
+
+  // --- Parse timer_end robustly (handles seconds or ms) ---
+  let serverRemainingSeconds = null;
+  if (d.timer_end) {
+    let timerEnd = Number(d.timer_end) || 0;
+    // convert to ms if looks like unix seconds (10-digit)
+    if (timerEnd > 0 && timerEnd < 1e12) timerEnd = timerEnd * 1000;
+    const remainingMs = timerEnd - Date.now();
+    if (remainingMs > 0) serverRemainingSeconds = Math.floor(remainingMs / 1000);
+    else serverRemainingSeconds = 0;
+  }
+
+  // --- Or fallback to remaining / remaining_h / remaining_m if provided ---
+  if (serverRemainingSeconds === null) {
+    if (typeof d.remaining === 'number') {
+      serverRemainingSeconds = Math.max(0, Math.floor(d.remaining));
+    } else if (typeof d.remaining_h === 'number' || typeof d.remaining_m === 'number') {
+      const rh = d.remaining_h || 0, rm = d.remaining_m || 0;
+      serverRemainingSeconds = Math.max(0, rh*3600 + rm*60);
+    }
+  }
+
+  // --- Apply durations if provided ---
+  if (typeof d.on_dur_h === 'number' || typeof d.on_dur_m === 'number'){
+    const oh = d.on_dur_h||0, om = d.on_dur_m||0;
+    onSeconds = oh*3600 + om*60;
+    updateDisplays();
+  }
+  if (typeof d.off_dur_h === 'number' || typeof d.off_dur_m === 'number'){
+    const fh = d.off_dur_h||0, fm = d.off_dur_m||0;
+    offSeconds = fh*3600 + fm*60;
+    updateDisplays();
+  }
+
+  // --- Basic server flags & time ---
+  const nowMs = Date.now();
+  const runningFlag = (d.running === true);
+  const suppressionActive = runningFlag && nowMs < ignoreRunningUntil;
+
+  // --- Update localRemaining from server value if available ---
+  if (serverRemainingSeconds !== null) {
+    localRemaining = Math.max(0, Number(serverRemainingSeconds));
+    countEl.innerText = secToHHMMSS(localRemaining);
+    if (currentView === 'running' && !countdownInterval && localRemaining > 0) {
+      startLocalCountdown();
+    } else if (localRemaining === 0 && countdownInterval) {
+      stopLocalCountdown();
+      countEl.innerText = '00:00:00';
+    }
+  } else if (!runningFlag) {
+    // no timing info and not running -> show placeholder
+    countEl.innerText = '--:--:--';
+    localRemaining = 0;
+    stopLocalCountdown();
+  }
+
+  // --- Phase & state display (respect manual view) ---
+  phaseEl.innerText = d.phase || (d.state ? 'ON' : 'OFF') || '—';
+  if (currentView !== 'manual') {
+    stateEl.innerText = d.state === true ? 'ON' : 'OFF';
+  } else {
+    stateEl.innerText = localManualState ? 'ON' : 'OFF';
+  }
+
+  if (suppressionActive) {
+    // short-circuit if we're intentionally suppressing server updates while acting locally
+    return;
+  }
+
+  // --- When running flag is set on server, show running UI ---
+  if (runningFlag) {
+    prevView = currentView;
+    show('running');
+
+    // set pill text: preserve manual UI if user is in manual view
+    if (currentView === 'manual') {
+      pillEl.innerText = statusText({ state: localManualState, mode: 'manual' });
+    } else {
+      pillEl.innerText = statusText(d);
+    }
+
+    // reflect DB phase/state
+    phaseEl.innerText = d.phase || (d.state ? 'ON' : 'OFF') || '—';
+    stateEl.innerText = d.state === true ? 'ON' : 'OFF';
+
+    // lock manual toggles while running
+    manualOn.disabled = manualOff.disabled = true;
+    manualOn.classList.remove('on'); manualOff.classList.remove('on');
+
+    // ensure countdown is running (if server provided remaining)
+    if (localRemaining > 0 && !countdownInterval) startLocalCountdown();
+    return;
+  }
+
+  // --- Not running: restore the appropriate view and manual controls ---
+  if (currentView === 'manual') {
+    // preserve manual UI exactly as user interacted while in manual view
+    pillEl.innerText = statusText({ state: localManualState, mode: 'manual' });
+  } else {
+    pillEl.innerText = statusText(d);
+  }
+
+  if (nowMs >= ignoreRunningUntil) ignoreRunningUntil = 0;
+  if (prevView === 'auto' || prevView === 'manual') show(prevView); else show('select');
+  manualOn.disabled = manualOff.disabled = false;
+
+  // update manual UI from DB only when not in Manual view
+  if (currentView !== 'manual') {
+    const st = d.state === true;
+    manualState.innerText = st ? 'ON' : 'OFF';
+    if (st) {
+      manualOn.classList.add('on');
+      manualOff.classList.remove('on');
+      manualOn.classList.remove('hidden');
+      manualOff.classList.add('hidden');
+    } else {
+      manualOff.classList.add('on');
+      manualOn.classList.remove('on');
+      manualOff.classList.remove('hidden');
+      manualOn.classList.add('hidden');
+    }
+    localManualState = st;
+  }
+});
+
+
+  // initial fetch
+  ref.get().then(snap => {
+    const d = snap.val()||{};
+    const st = d.state === true;
+    manualState.innerText = st ? 'ON' : 'OFF';
+    if (st) { manualOn.classList.add('on'); manualOff.classList.remove('on'); }
+    else { manualOff.classList.add('on'); manualOn.classList.remove('on'); }
+    localManualState = st;
+    if (d.running !== true) manualOn.disabled = manualOff.disabled = false;
+    pillEl.innerText = statusText(d);
+  }).catch(()=>{});
+}
+
+/* helper write update */
+function writeUpdate(id, obj){
+  const updates = {};
+  Object.keys(obj).forEach(k => updates[`/relays/${id}/${k}`] = obj[k]);
+  return db.ref().update(updates);
+}
+
+function secToHHMM(s){
+  s = Math.max(0, Math.floor(Number(s)||0));
+  const hh = Math.floor(s/3600), mm = Math.floor((s%3600)/60);
+  return `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
+}
+function secToHHMMSS(s){
+  s = Math.max(0, Math.floor(Number(s)||0));
+  const hh = Math.floor(s/3600), mm = Math.floor((s%3600)/60), ss = s%60;
+  return `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}:${String(ss).padStart(2,'0')}`;
+}
+</script>
+</body>
+</html>
